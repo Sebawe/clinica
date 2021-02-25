@@ -1,0 +1,24 @@
+---
+title: "main"
+author: "ACE"
+date: "2/24/2021"
+output: html_document
+---
+```{r Functions}
+labelize <- function(df)
+{
+  x <- colnames(df)
+
+  for(i in 1:ncol(df))
+  {
+    original_name <- colnames(df[i])
+    print(original_name)
+    label(df[[i]]) <- original_name
+    j <- readline(prompt=paste("Name this variable:"))
+    colnames(df)[i] <- j
+  }
+}
+
+
+```
+
