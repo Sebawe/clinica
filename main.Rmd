@@ -19,6 +19,157 @@ labelize <- function(df)
   }
 }
 
+rndr.cohen.di <- function(x, name, ...) {
+  if (length(x) == 0) {
+    y <- BA[[name]]
+    s <- rep("", length(render.default(x=y, name=name, ...)))
+    if (is.numeric(y)) {
+      # One line code   
+      ## ANOVA
+      #p <- as.numeric(summary(aov(y~df$Reoperation, df))[[1]][["Pr(>F)"]][1])
+      
+      ## T-test
+      p <- t.test(y ~ BA$Reoperation)$p.value
+      
+      ## Cohen's D
+      yes <- subset(BA, Reoperation=="Yes")
+      no <- subset(BA, Reoperation=="No")
+      p <- cohen.d(na.omit(yes[[name]]), na.omit(no[[name]]))[3]
+      
+      # This method doesn't deal with missing values
+      #p <- cohen.d(y, droplevels(BA$Reoperation))[3]
+      
+    } else {
+      tab <- table(y, droplevels(BA$Reoperation))
+      test = "Chi"
+      possible = "Yes"
+      for(cell in tab)
+      {
+        if(cell < 5 & cell != 0)
+        {
+          test = "Fisher"
+        }
+        else if(cell == 0)
+        {
+          possible = "No"
+        }
+      }
+      
+      
+      if(test == "Chi" & possible == "Yes")
+      {
+        #p <- chisq.test(tab)$p.value
+        p <- cramerV(tab)
+        #p <- "Chi-square"
+      } 
+      else if(test == "Fisher" & possible == "Yes")
+      {
+        #p <- fisher.test(tab)$p.value
+        p <- cramerV(tab)
+        #p <- "Fisher's"
+      }
+      else
+      {
+        p <- "NA"
+      }
+      
+      #p <- chisq.test(tab)$p.value
+    }
+    if(p != "NA")
+    {
+      s[2] <- sub("<", "&lt;", format.pval(as.double(p), digits=3, eps=0.001))
+      #s[2] <- sub("<", "&lt;", p)
+      
+    } else
+    {
+      s[2] <- "NA"
+    }
+    ## Just for debugging
+    #s[2] <- p
+    s
+  } else {
+    render.default(x=x, name=name, ...)
+  }
+}
+
+rndr.p.di <- function(x, name, ...) {
+  if (length(x) == 0) {
+    y <- BA[[name]]
+    s <- rep("", length(render.default(x=y, name=name, ...)))
+    if (is.numeric(y)) {
+      # One line code   
+      ## ANOVA
+      #p <- as.numeric(summary(aov(y~df$Reoperation, df))[[1]][["Pr(>F)"]][1])
+      
+      ## T-test
+      p <- t.test(y ~ BA$Reoperation)$p.value
+      
+      ## Cohen's D
+      #yes <- subset(BA, Reoperation=="Yes")
+      #no <- subset(BA, Reoperation=="No")
+      #p <- cohen.d(na.omit(yes[[name]]), na.omit(no[[name]]))[3]
+      
+      # This method doesn't deal with missing values
+      #p <- cohen.d(y, droplevels(BA$Reoperation))[3]
+      
+    } else {
+      tab <- table(y, droplevels(BA$Reoperation))
+      test = "Chi"
+      possible = "Yes"
+      for(cell in tab)
+      {
+        if(cell < 5 & cell != 0)
+        {
+          test = "Fisher"
+        }
+        else if(cell == 0)
+        {
+          possible = "No"
+        }
+      }
+      
+      
+      if(test == "Chi" & possible == "Yes")
+      {
+        p <- chisq.test(tab)$p.value
+        #p <- cramerV(tab)
+        #p <- "Chi-square"
+      } 
+      else if(test == "Fisher" & possible == "Yes")
+      {
+        p <- fisher.test(tab)$p.value
+        #p <- cramerV(tab)
+        #p <- "Fisher's"
+      }
+      else
+      {
+        p <- "NA"
+      }
+      
+      #p <- chisq.test(tab)$p.value
+    }
+    if(p != "NA")
+    {
+      s[2] <- sub("<", "&lt;", format.pval(as.double(p), digits=3, eps=0.001))
+      #s[2] <- sub("<", "&lt;", p)
+      
+    } else
+    {
+      s[2] <- "NA"
+    }
+    ## Just for debugging
+    #s[2] <- p
+    s
+  } else {
+    render.default(x=x, name=name, ...)
+  }
+}
+
+
+rndr.strat <- function(label, n, ...) {
+  ifelse(n==0, label, render.strat.default(label, n, ...))
+}
+
 
 ```
 
