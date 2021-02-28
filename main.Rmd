@@ -8,15 +8,28 @@ output: html_document
 labelize <- function(df)
 {
   x <- colnames(df)
-
+  readline(prompt=paste("Good morning Sebawe, Are you ready?  "))
   for(i in 1:ncol(df))
   {
+    y <- df[[i]]
     original_name <- colnames(df[i])
     print(original_name)
-    label(df[[i]]) <- original_name
+    label(y) <- original_name
     j <- readline(prompt=paste("Name this variable:"))
     colnames(df)[i] <- j
+    if(!is.numeric(y))
+    {
+      print("Sampling: ")
+      print(df[[i]][1:10])
+      level <- strsplit(readline(prompt=paste("What are the levels?  ")), " ")[[1]]
+      label <- strsplit(readline(prompt=paste("Label them please ... ")), " ")[[1]]
+      df[i] <- factor(y,
+                        levels=level,
+                        labels=label)
+    }
   }
+  
+  return(df)
 }
 
 rndr.cohen.di <- function(x, name, ...) {
@@ -101,8 +114,18 @@ rndr.p.di <- function(x, name, ...) {
       ## ANOVA
       #p <- as.numeric(summary(aov(y~df$Reoperation, df))[[1]][["Pr(>F)"]][1])
       
-      ## T-test
-      p <- t.test(y ~ BA$Reoperation)$p.value
+      normality <- shapiro.test(y)$p.value
+      
+      if(normality >= 0.05)
+      {
+        ## T-test
+        p <- t.test(y ~ BA$Reoperation)$p.value
+      }
+      else
+      {
+        p <- wilcox.test(y ~ BA$Reoperation)$p.value
+      }
+        
       
       ## Cohen's D
       #yes <- subset(BA, Reoperation=="Yes")
